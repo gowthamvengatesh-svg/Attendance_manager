@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Admin Dashboard</title>
+
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+.teacher-card{
+background:white;
+padding:12px;
+margin:8px 0;
+border-radius:8px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+font-size:14px;
+}
+
+.teachers-grid{
+margin-top:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+📊 Admin Dashboard
+
+<button id="logoutBtn">Logout</button>
+
+</header>
+
+
+<div class="container">
+
+<!-- Analytics -->
+
+<div class="card">
+
+<h3>College Analytics</h3>
+
+<div id="analytics">
+
+<p>Total Teachers: <b id="totalTeachers">0</b></p>
+
+<p>Total Students: <b id="totalStudents">0</b></p>
+
+<p>Attendance Percentage: <b id="attendancePercent">0%</b></p>
+
+</div>
+
+<canvas id="collegeChart"></canvas>
+
+</div>
+
+
+<!-- Teachers -->
+
+<div class="card">
+
+<h3>Teachers</h3>
+
+<div id="teachers"></div>
+
+</div>
+
+
+<!-- Calendar Attendance -->
+
+<div class="card">
+
+<h3>Attendance by Date</h3>
+
+<input type="date" id="calendarDate">
+
+<button id="viewDateReport">View</button>
+
+<div id="calendarResult"></div>
+
+</div>
+
+
+<!-- Database -->
+
+<div class="card">
+
+<h3>Database Control</h3>
+
+<button id="resetDatabase" style="background:#c62828;color:white;">
+Reset Database
+</button>
+
+</div>
+
+
+<!-- Export -->
+
+<div class="card">
+
+<h3>Reports</h3>
+
+<button id="exportCollegeReport">
+Export College Report
+</button>
+
+</div>
+
+</div>
+
+
+<script type="module" src="admin.js"></script>
+
+</body>
+
+</html>

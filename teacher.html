@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Teacher Dashboard</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<script type="module" src="app.js"></script>
+
+</head>
+
+<body>
+
+<header>
+
+📋 Teacher Attendance
+
+<div class="header-right">
+
+<span id="userInfo"></span>
+
+<button id="logoutBtn">Logout</button>
+
+</div>
+
+</header>
+
+<div class="container">
+
+<div class="card">
+
+<h3>Teacher Information</h3>
+
+<input id="teacherName" placeholder="Teacher Name">
+
+<input id="className" placeholder="Class Name (ECE-A)">
+
+<button id="saveProfile">Save</button>
+
+</div>
+
+
+<div class="card">
+
+<h3>Add Student</h3>
+
+<input id="roll" placeholder="Roll Number">
+<input id="name" placeholder="Student Name">
+
+<button id="addStudent">Add Student</button>
+
+</div>
+
+
+<div class="card">
+
+<h3>Import Excel</h3>
+
+<input type="file" id="excelFile">
+<button id="uploadExcel">Upload Excel</button>
+
+</div>
+
+
+<div class="card">
+
+<button id="presentAll">✔ Present All</button>
+<button id="removeAll">🗑 Remove All</button>
+
+</div>
+
+
+<div class="card">
+
+<h3>Attendance Summary</h3>
+
+<div id="summary"></div>
+
+<canvas id="chart"></canvas>
+
+<input type="date" id="attendanceDate">
+
+<button id="viewHistory">
+View Attendance
+</button>
+
+<div id="historyList"></div>
+
+</div>
+
+
+<div class="card">
+
+<h3>Students</h3>
+
+<div id="studentList"></div>
+
+</div>
+
+
+<div class="card">
+
+<h3>Send Absent List</h3>
+
+<input id="whatsappNumber" placeholder="WhatsApp Number">
+
+<button id="sendWhatsApp">
+Send
+</button>
+
+</div>
+
+
+<div class="card">
+
+<button id="exportExcel">
+Export Excel
+</button>
+
+</div>
+
+</div>
+
+<script type="module" src="app.js"></script>
+
+</body>
+</html>
