@@ -113,3 +113,106 @@ background:#e3f2fd;
 .student:hover{
 transform:scale(1.02);
 }
+
+/* Mobile Responsive */
+
+@media screen and (max-width:768px){
+
+header{
+flex-direction:column;
+gap:10px;
+text-align:center;
+}
+
+.container{
+padding:10px;
+}
+
+.card{
+padding:15px;
+margin-bottom:15px;
+}
+
+input{
+width:100%;
+margin:5px 0;
+}
+
+button{
+width:100%;
+margin:5px 0;
+padding:12px;
+font-size:16px;
+}
+
+.student{
+flex-direction:column;
+align-items:flex-start;
+gap:10px;
+}
+
+.student div:last-child{
+display:flex;
+gap:10px;
+width:100%;
+}
+
+.student button{
+flex:1;
+}
+
+.avatar{
+width:28px;
+height:28px;
+font-size:14px;
+}
+
+}
+
+button{
+min-height:40px;
+font-size:15px;
+}
+
+.present-active{
+background:#2e7d32;
+color:white;
+}
+
+.absent-active{
+background:#c62828;
+color:white;
+}
+
+.mobile-nav{
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+background:white;
+border-top:1px solid #ddd;
+display:flex;
+justify-content:space-around;
+padding:8px;
+}
+
+.mobile-nav button{
+flex:1;
+margin:0 5px;
+}
+.present-btn{
+background:#2e7d32;
+color:white;
+}
+
+.absent-btn{
+background:#c62828;
+color:white;
+}
+body{
+-webkit-tap-highlight-color:transparent;
+}
+
+button{
+touch-action:manipulation;
+}
