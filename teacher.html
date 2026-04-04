@@ -11,7 +11,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
 
 <script type="module" src="app.js"></script>
 
@@ -24,11 +24,8 @@
 📋 Teacher Attendance
 
 <div class="header-right">
-
 <span id="userInfo"></span>
-
 <button id="logoutBtn">Logout</button>
-
 </div>
 
 </header>
@@ -40,13 +37,11 @@
 <h3>Teacher Information</h3>
 
 <input id="teacherName" placeholder="Teacher Name">
-
-<input id="className" placeholder="Class Name (ECE-A)">
+<input id="className" placeholder="Class Name">
 
 <button id="saveProfile">Save</button>
 
 </div>
-
 
 <div class="card">
 
@@ -59,7 +54,6 @@
 
 </div>
 
-
 <div class="card">
 
 <h3>Import Excel</h3>
@@ -69,14 +63,12 @@
 
 </div>
 
-
 <div class="card">
 
 <button id="presentAll">✔ Present All</button>
 <button id="removeAll">🗑 Remove All</button>
 
 </div>
-
 
 <div class="card">
 
@@ -88,14 +80,11 @@
 
 <input type="date" id="attendanceDate">
 
-<button id="viewHistory">
-View Attendance
-</button>
+<button id="viewHistory">View Attendance</button>
 
 <div id="historyList"></div>
 
 </div>
-
 
 <div class="card">
 
@@ -105,45 +94,23 @@ View Attendance
 
 </div>
 
-
 <div class="card">
 
 <h3>Send Absent List</h3>
 
 <input id="whatsappNumber" placeholder="WhatsApp Number">
 
-<button id="sendWhatsApp">
-Send
-</button>
+<button id="sendWhatsApp">Send</button>
 
 </div>
-
 
 <div class="card">
 
-<button id="exportExcel">
-Export Excel
-</button>
+<button id="exportExcel">Export Excel</button>
 
 </div>
 
 </div>
-
-<div class="mobile-nav">
-
-<button onclick="window.scrollTo(0,0)">Home</button>
-
-<button onclick="document.getElementById('studentList').scrollIntoView()">
-Students
-</button>
-
-<button onclick="document.getElementById('summary').scrollIntoView()">
-Summary
-</button>
-
-</div>
-
-<script type="module" src="app.js"></script>
 
 </body>
 </html>

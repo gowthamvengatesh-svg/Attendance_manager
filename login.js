@@ -17,13 +17,9 @@ const uid=result.user.uid
 const adminCheck=await getDoc(doc(db,"admins",uid))
 
 if(adminCheck.exists()){
-
 window.location="admin.html"
-
 }else{
-
 window.location="teacher.html"
-
 }
 
 }

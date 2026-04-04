@@ -11,20 +11,11 @@ chart=new Chart(ctx,{
 type:"doughnut",
 
 data:{
-
 labels:["Present","Absent"],
-
 datasets:[{
-
 data:[present,absent],
-
-backgroundColor:[
-"#2e7d32",
-"#c62828"
-]
-
+backgroundColor:["#2e7d32","#c62828"]
 }]
-
 }
 
 })

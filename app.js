@@ -22,10 +22,8 @@ from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"
 import { uploadExcel } from "./excel.js"
 import { drawChart } from "./charts.js"
 
-
 let attendance={}
 let students=[]
-
 
 document.getElementById("addStudent").onclick=addStudent
 document.getElementById("uploadExcel").onclick=uploadExcel
@@ -37,16 +35,11 @@ document.getElementById("saveProfile").onclick=saveProfile
 document.getElementById("logoutBtn").onclick=logout
 document.getElementById("viewHistory").onclick=viewHistory
 
-
 onAuthStateChanged(auth,(user)=>{
-
 if(user){
 loadStudents()
 }
-
 })
-
-
 
 async function saveProfile(){
 
@@ -66,8 +59,6 @@ className:cls
 )
 
 }
-
-
 
 async function addStudent(){
 
@@ -90,8 +81,6 @@ document.getElementById("name").value=""
 loadStudents()
 
 }
-
-
 
 window.loadStudents=async function(){
 
@@ -120,10 +109,9 @@ attendance[docSnap.id]="Present"
 let div=document.createElement("div")
 
 div.className="student"
-
 div.dataset.id=docSnap.id
 
-div.innerHTML=`
+div.innerHTML = `
 
 <div>
 
@@ -141,6 +129,10 @@ div.innerHTML=`
 
 <button onclick="mark('${docSnap.id}','Absent',this)">✖</button>
 
+<button onclick="moveUp('${docSnap.id}')">⬆</button>
+
+<button onclick="moveDown('${docSnap.id}')">⬇</button>
+
 <button onclick="removeStudent('${docSnap.id}')">🗑</button>
 
 </div>
@@ -153,11 +145,8 @@ container.appendChild(div)
 
 updateSummary()
 
-enableDrag()
 
 }
-
-
 
 window.mark=function(id,status,btn){
 
@@ -165,15 +154,17 @@ attendance[id]=status
 
 const parent=btn.parentElement
 
-parent.querySelectorAll("button")[0].classList.remove("present-active")
-parent.querySelectorAll("button")[1].classList.remove("absent-active")
+const buttons=parent.querySelectorAll("button")
 
-if(status=="Present"){
-parent.querySelectorAll("button")[0].classList.add("present-active")
+buttons[0].classList.remove("present-active")
+buttons[1].classList.remove("absent-active")
+
+if(status==="Present"){
+buttons[0].classList.add("present-active")
 }
 
-if(status=="Absent"){
-parent.querySelectorAll("button")[1].classList.add("absent-active")
+if(status==="Absent"){
+buttons[1].classList.add("absent-active")
 }
 
 updateSummary()
@@ -182,19 +173,27 @@ saveAttendance()
 
 }
 
-
-
 async function removeStudent(id){
+
+try{
 
 await deleteDoc(
 doc(db,"users",auth.currentUser.uid,"students",id)
 )
 
+students=students.filter(s=>s.id!==id)
+
+delete attendance[id]
+
 loadStudents()
+
+}catch(err){
+
+console.error(err)
 
 }
 
-
+}
 
 function presentAll(){
 
@@ -206,23 +205,19 @@ updateSummary()
 
 }
 
-
-
 async function removeAllStudents(){
 
 const snapshot=await getDocs(
 collection(db,"users",auth.currentUser.uid,"students")
 )
 
-snapshot.forEach(async s=>{
+for(const s of snapshot.docs){
 await deleteDoc(s.ref)
-})
+}
 
 loadStudents()
 
 }
-
-
 
 function updateSummary(){
 
@@ -243,8 +238,6 @@ drawChart(present,absent)
 
 }
 
-
-
 function sendWhatsApp(){
 
 let number=document.getElementById("whatsappNumber").value
@@ -264,8 +257,6 @@ msg+=s.roll+" - "+s.name+"%0A"
 window.open(`https://wa.me/${number}?text=${msg}`)
 
 }
-
-
 
 function exportExcel(){
 
@@ -291,8 +282,6 @@ XLSX.writeFile(wb,"attendance.xlsx")
 
 }
 
-
-
 function logout(){
 
 signOut(auth)
@@ -300,8 +289,6 @@ signOut(auth)
 window.location="index.html"
 
 }
-
-
 
 async function saveAttendance(){
 
@@ -329,8 +316,6 @@ attendanceData:attendance
 })
 
 }
-
-
 
 async function viewHistory(){
 
@@ -367,39 +352,49 @@ Absent: ${data.absent}
 })
 
 }
+async function moveUp(id){
 
+const index = students.findIndex(s => s.id === id)
 
+if(index <= 0) return
 
-function enableDrag(){
-
-const list=document.getElementById("studentList")
-
-new Sortable(list,{
-
-animation:150,
-
-onEnd:async function(){
-
-const items=list.querySelectorAll(".student")
-
-let index=0
-
-for(const item of items){
-
-const id=item.dataset.id
+const current = students[index]
+const above = students[index - 1]
 
 await updateDoc(
-doc(db,"users",auth.currentUser.uid,"students",id),
-{
-order:index
-})
+doc(db,"users",auth.currentUser.uid,"students",current.id),
+{ order: index - 1 }
+)
 
-index++
+await updateDoc(
+doc(db,"users",auth.currentUser.uid,"students",above.id),
+{ order: index }
+)
+
+loadStudents()
 
 }
 
-}
 
-})
+async function moveDown(id){
+
+const index = students.findIndex(s => s.id === id)
+
+if(index === students.length - 1) return
+
+const current = students[index]
+const below = students[index + 1]
+
+await updateDoc(
+doc(db,"users",auth.currentUser.uid,"students",current.id),
+{ order: index + 1 }
+)
+
+await updateDoc(
+doc(db,"users",auth.currentUser.uid,"students",below.id),
+{ order: index }
+)
+
+loadStudents()
 
 }
