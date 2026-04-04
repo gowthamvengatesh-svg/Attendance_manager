@@ -100,21 +100,7 @@ margin:8px 0;
 border-radius:8px;
 }
 
-.student{
-cursor:grab;
-transition:0.2s;
-}
 
-.student:active{
-cursor:grabbing;
-background:#e3f2fd;
-}
-
-.student:hover{
-transform:scale(1.02);
-}
-
-/* Mobile Responsive */
 
 @media screen and (max-width:768px){
 
@@ -215,4 +201,9 @@ body{
 
 button{
 touch-action:manipulation;
+}
+
+.student button{
+margin-left:4px;
+font-size:14px;
 }

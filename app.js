@@ -84,7 +84,7 @@ loadStudents()
 
 window.loadStudents=async function(){
 
-const q=query(
+const q = query(
 collection(db,"users",auth.currentUser.uid,"students"),
 orderBy("order")
 )
@@ -173,7 +173,7 @@ saveAttendance()
 
 }
 
-async function removeStudent(id){
+window.removeStudent = async function(id){
 
 try{
 
@@ -181,15 +181,13 @@ await deleteDoc(
 doc(db,"users",auth.currentUser.uid,"students",id)
 )
 
-students=students.filter(s=>s.id!==id)
-
-delete attendance[id]
-
 loadStudents()
 
 }catch(err){
 
 console.error(err)
+
+alert("Failed to remove student")
 
 }
 
@@ -352,48 +350,44 @@ Absent: ${data.absent}
 })
 
 }
-async function moveUp(id){
+window.moveUp = async function(id){
 
 const index = students.findIndex(s => s.id === id)
 
 if(index <= 0) return
 
-const current = students[index]
-const above = students[index - 1]
+const temp = students[index]
+students[index] = students[index-1]
+students[index-1] = temp
 
-await updateDoc(
-doc(db,"users",auth.currentUser.uid,"students",current.id),
-{ order: index - 1 }
-)
-
-await updateDoc(
-doc(db,"users",auth.currentUser.uid,"students",above.id),
-{ order: index }
-)
-
-loadStudents()
+await updateStudentOrder()
 
 }
 
-
-async function moveDown(id){
+window.moveDown = async function(id){
 
 const index = students.findIndex(s => s.id === id)
 
-if(index === students.length - 1) return
+if(index === students.length-1) return
 
-const current = students[index]
-const below = students[index + 1]
+const temp = students[index]
+students[index] = students[index+1]
+students[index+1] = temp
+
+await updateStudentOrder()
+
+}
+
+async function updateStudentOrder(){
+
+for(let i=0;i<students.length;i++){
 
 await updateDoc(
-doc(db,"users",auth.currentUser.uid,"students",current.id),
-{ order: index + 1 }
+doc(db,"users",auth.currentUser.uid,"students",students[i].id),
+{order:i}
 )
 
-await updateDoc(
-doc(db,"users",auth.currentUser.uid,"students",below.id),
-{ order: index }
-)
+}
 
 loadStudents()
 
