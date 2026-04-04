@@ -3,95 +3,96 @@ import { db,auth } from "./firebase.js"
 import {
 collection,
 getDocs,
-deleteDoc
+deleteDoc,
+doc,
+getDoc,
+query,
+orderBy
 }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
 
 import { signOut }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"
 
-let chart
 
-window.onload=loadData
+
+
+
+let chart
+let currentClassUID = null
+
+
+window.onload = loadData
 
 
 async function loadData(){
 
-const teachersContainer=document.getElementById("teachers")
+const container = document.getElementById("classesContainer")
 
-teachersContainer.innerHTML="Loading..."
+if(!container) return
 
-const users=await getDocs(collection(db,"users"))
+container.innerHTML = "Loading..."
 
-teachersContainer.innerHTML=""
+const users = await getDocs(collection(db,"users"))
 
-let totalTeachers=0
-let totalStudents=0
-let totalPresent=0
-let totalAbsent=0
+container.innerHTML = ""
+
+let totalTeachers = 0
+let totalStudents = 0
+let totalPresent = 0
+let totalAbsent = 0
 
 
 for(const user of users.docs){
 
 totalTeachers++
 
-const uid=user.id
-const data=user.data()
+const uid = user.id
+const data = user.data()
 
-const teacherName=data.teacherName || "Unknown"
-const className=data.className || "Not Set"
+const teacher = data.teacherName || "Unknown"
+const className = data.className || "No Class"
 
 
-// students
-
-const studentsSnap=await getDocs(
+// fetch students
+const studentsSnap = await getDocs(
 collection(db,"users",uid,"students")
 )
 
-const studentCount=studentsSnap.size
+const studentCount = studentsSnap.size
 
-totalStudents+=studentCount
+totalStudents += studentCount
 
 
-// attendance
-
-const historySnap=await getDocs(
+// fetch attendance history
+const historySnap = await getDocs(
 collection(db,"users",uid,"attendanceHistory")
 )
 
-let present=0
-let absent=0
+let present = 0
+let absent = 0
 
 historySnap.forEach(h=>{
 
-const d=h.data()
+const d = h.data()
 
-present+=d.present
-absent+=d.absent
+present += d.present || 0
+absent += d.absent || 0
 
 })
 
-totalPresent+=present
-totalAbsent+=absent
+totalPresent += present
+totalAbsent += absent
 
 
-teachersContainer.innerHTML+=`
+// create class card
+container.innerHTML += `
 
-<div class="teacher-card">
+<div class="class-card" onclick="openClass('${uid}','${className}')">
 
-<b>Teacher:</b> ${teacherName}
-
-<br>
-
-<b>Class:</b> ${className}
-
-<br>
-
+<b>Class:</b> ${className}<br>
+<b>Teacher:</b> ${teacher}<br>
 <b>Students:</b> ${studentCount}
-
-<br>
-
-<b>Attendance Records:</b> ${historySnap.size}
 
 </div>
 
@@ -100,23 +101,26 @@ teachersContainer.innerHTML+=`
 }
 
 
-// analytics
+// update analytics
+const tTeachers = document.getElementById("totalTeachers")
+const tStudents = document.getElementById("totalStudents")
+const tPercent = document.getElementById("attendancePercent")
 
-document.getElementById("totalTeachers").innerText=totalTeachers
-document.getElementById("totalStudents").innerText=totalStudents
+if(tTeachers) tTeachers.innerText = totalTeachers
+if(tStudents) tStudents.innerText = totalStudents
 
-let percent=0
 
-if(totalPresent+totalAbsent>0){
+let percent = 0
 
-percent=Math.round(
-(totalPresent/(totalPresent+totalAbsent))*100
+if(totalPresent + totalAbsent > 0){
+
+percent = Math.round(
+(totalPresent / (totalPresent + totalAbsent)) * 100
 )
 
 }
 
-document.getElementById("attendancePercent").innerText=
-percent+"%"
+if(tPercent) tPercent.innerText = percent + "%"
 
 
 drawCollegeChart(totalPresent,totalAbsent)
@@ -125,31 +129,29 @@ drawCollegeChart(totalPresent,totalAbsent)
 
 
 
+// ---------- CHART ----------
+
 function drawCollegeChart(present,absent){
 
-const ctx=document.getElementById("collegeChart")
+const ctx = document.getElementById("collegeChart")
+
+if(!ctx) return
 
 if(chart) chart.destroy()
 
-chart=new Chart(ctx,{
+chart = new Chart(ctx,{
 
 type:"pie",
 
 data:{
-
 labels:["Present","Absent"],
-
 datasets:[{
-
 data:[present,absent],
-
 backgroundColor:[
 "#2e7d32",
 "#c62828"
 ]
-
 }]
-
 }
 
 })
@@ -158,90 +160,182 @@ backgroundColor:[
 
 
 
-document.getElementById("viewDateReport").onclick=viewDateReport
+// ---------- OPEN CLASS ----------
+
+window.openClass = async function(uid,className){
+
+currentClassUID = uid
+
+const container = document.getElementById("classDetails")
+
+if(!container) return
+
+container.innerHTML = `<h3>${className}</h3>Loading...`
 
 
-async function viewDateReport(){
-
-const date=document.getElementById("calendarDate").value
-
-const result=document.getElementById("calendarResult")
-
-result.innerHTML=""
-
-const users=await getDocs(collection(db,"users"))
-
-for(const user of users.docs){
-
-const uid=user.id
-
-const history=await getDocs(
-collection(db,"users",uid,"attendanceHistory")
+const studentsSnap = await getDocs(
+collection(db,"users",uid,"students")
 )
 
-history.forEach(h=>{
+let html = `
 
-const data=h.data()
+<table class="student-table">
 
-if(data.date===date){
-
-result.innerHTML+=`
-
-<div class="history-card">
-
-<b>Date:</b> ${date}
-
-<br>
-
-Present: ${data.present}
-
-<br>
-
-Absent: ${data.absent}
-
-</div>
+<tr>
+<th>Roll</th>
+<th>Name</th>
+<th>Status</th>
+</tr>
 
 `
 
-}
+
+studentsSnap.forEach(s=>{
+
+const d = s.data()
+
+html += `
+
+<tr>
+<td>${d.roll}</td>
+<td>${d.name}</td>
+<td>--</td>
+</tr>
+
+`
 
 })
 
-}
+html += `</table>`
+
+container.innerHTML = html
 
 }
 
 
 
-document.getElementById("resetDatabase").onclick=resetDatabase
+// ---------- VIEW ATTENDANCE ----------
+
+const viewBtn = document.getElementById("viewClassAttendance")
+
+if(viewBtn){
+
+viewBtn.onclick = viewClassAttendance
+
+}
+
+
+
+async function viewClassAttendance(){
+
+const date = document.getElementById("classDate").value
+
+if(!date || !currentClassUID) return
+
+
+const attendanceDoc = await getDoc(
+doc(db,"users",currentClassUID,"attendanceHistory",date)
+)
+
+
+if(!attendanceDoc.exists()){
+
+alert("Attendance not marked for this date")
+
+return
+
+}
+
+
+const attendanceData = attendanceDoc.data().attendanceData
+
+const q = query(
+collection(db,"users",currentClassUID,"students"),
+orderBy("roll")
+)
+
+const studentsSnap = await getDocs(q)
+
+
+let html = `
+<table class="student-table">
+
+<tr>
+<th>Roll</th>
+<th>Name</th>
+<th>Status</th>
+</tr>
+`
+
+
+studentsSnap.forEach(s=>{
+
+const d = s.data()
+
+const status = attendanceData[s.id] || "Present"
+
+const cls = status === "Absent" ? "absent" : "present"
+
+html += `
+<tr>
+<td>${d.roll}</td>
+<td>${d.name}</td>
+<td class="${cls}">${status}</td>
+</tr>
+`
+
+})
+
+
+html += `</table>`
+
+
+document.getElementById("classDetails").innerHTML = html
+
+}
+
+
+// ---------- RESET DATABASE ----------
+
+const resetBtn = document.getElementById("resetDatabase")
+
+if(resetBtn){
+
+resetBtn.onclick = resetDatabase
+
+}
 
 
 async function resetDatabase(){
 
-if(!confirm("Delete ALL database?"))return
+if(!confirm("Delete ALL database?")) return
 
-const users=await getDocs(collection(db,"users"))
+const users = await getDocs(collection(db,"users"))
 
 for(const user of users.docs){
 
-const uid=user.id
+const uid = user.id
 
 
-const students=await getDocs(
+const students = await getDocs(
 collection(db,"users",uid,"students")
 )
 
 for(const s of students.docs){
+
 await deleteDoc(s.ref)
+
 }
 
 
-const history=await getDocs(
+const history = await getDocs(
 collection(db,"users",uid,"attendanceHistory")
 )
 
 for(const h of history.docs){
+
 await deleteDoc(h.ref)
+
 }
 
 }
@@ -254,13 +348,73 @@ loadData()
 
 
 
-document.getElementById("logoutBtn").onclick=logout
+// ---------- LOGOUT ----------
 
+const logoutBtn = document.getElementById("logoutBtn")
+
+if(logoutBtn){
+
+logoutBtn.onclick = logout
+
+}
 
 function logout(){
 
 signOut(auth)
 
-window.location="index.html"
+window.location = "index.html"
+
+}
+
+async function viewCollegeAttendance(date){
+
+const users = await getDocs(collection(db,"users"))
+
+let result = ""
+
+for(const user of users.docs){
+
+const uid = user.id
+const data = user.data()
+
+const teacher = data.teacherName || "Unknown"
+const className = data.className || "No Class"
+
+const attendanceDoc = await getDoc(
+doc(db,"users",uid,"attendanceHistory",date)
+)
+
+if(attendanceDoc.exists()){
+
+const d = attendanceDoc.data()
+
+result += `
+<div class="class-card">
+
+<b>${className}</b><br>
+Teacher: ${teacher}<br>
+Present: ${d.present}<br>
+Absent: ${d.absent}
+
+</div>
+`
+
+}else{
+
+result += `
+<div class="class-card">
+
+<b>${className}</b><br>
+Teacher: ${teacher}<br>
+Attendance not marked
+
+</div>
+`
+
+}
+
+}
+
+document.getElementById("calendarResult").innerHTML = result
 
 }

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 
 <meta charset="UTF-8">
@@ -8,6 +9,7 @@
 <title>Admin Dashboard</title>
 
 <link rel="stylesheet" href="style.css">
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
@@ -22,39 +24,62 @@
 
 </header>
 
+
+
 <div class="container">
+
+
+<!-- COLLEGE ANALYTICS -->
 
 <div class="card">
 
 <h3>College Analytics</h3>
 
 <p>Total Teachers: <b id="totalTeachers">0</b></p>
+
 <p>Total Students: <b id="totalStudents">0</b></p>
+
 <p>Attendance Percentage: <b id="attendancePercent">0%</b></p>
 
 <canvas id="collegeChart"></canvas>
 
 </div>
 
-<div class="card">
 
-<h3>Teachers</h3>
 
-<div id="teachers"></div>
-
-</div>
+<!-- CLASSES SECTION -->
 
 <div class="card">
 
-<h3>Attendance by Date</h3>
+<h3>Classes</h3>
 
-<input type="date" id="calendarDate">
+<div id="classesContainer">
 
-<button id="viewDateReport">View</button>
-
-<div id="calendarResult"></div>
+Loading classes...
 
 </div>
+
+</div>
+
+
+
+<!-- CLASS DETAILS -->
+
+<div class="card">
+
+<h3>Class Details</h3>
+
+<input type="date" id="classDate">
+
+<button id="viewClassAttendance">View Attendance</button>
+
+<div id="classDetails"></div>
+
+</div>
+
+
+
+<!-- DATABASE CONTROL -->
 
 <div class="card">
 
@@ -64,15 +89,31 @@
 
 </div>
 
+
+
 </div>
 
+
+
 <script type="module" src="admin.js"></script>
+
+
+
+<!-- LOADER -->
+
 <div id="loader" class="loader-wrapper">
 
 <div class="loader"></div>
 
 </div>
 
+
+
+<!-- TOAST -->
+
 <div id="toast" class="toast"></div>
+
+
 </body>
+
 </html>

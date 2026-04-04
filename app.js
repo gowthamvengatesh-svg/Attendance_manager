@@ -77,7 +77,7 @@ document.getElementById("sendWhatsApp").onclick=sendWhatsApp
 document.getElementById("saveProfile").onclick=saveProfile
 document.getElementById("logoutBtn").onclick=logout
 document.getElementById("viewHistory").onclick=viewHistory
-
+document.getElementById("saveAttendanceBtn").onclick = saveAttendance
 
 // ---------- PROFILE ----------
 
@@ -357,27 +357,34 @@ window.location="index.html"
 
 async function saveAttendance(){
 
-const date=document.getElementById("attendanceDate").value
+const date = document.getElementById("attendanceDate").value
 
-if(!date) return
+if(!date){
+alert("Select date first")
+return
+}
 
-let present=0
-let absent=0
+let present = 0
+let absent = 0
 
 for(let s in attendance){
 
-if(attendance[s]=="Present") present++
+if(attendance[s] === "Present") present++
 else absent++
 
 }
 
-await addDoc(
-collection(db,"users",auth.currentUser.uid,"attendanceHistory"),
+await setDoc(
+doc(db,"users",auth.currentUser.uid,"attendanceHistory",date),
 {
-date,
-present,
-absent
-})
+date:date,
+present:present,
+absent:absent,
+attendanceData:attendance
+}
+)
+
+showToast("Attendance saved")
 
 }
 
