@@ -1,32 +1,73 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Attendance Manager</title>
+<title>Smart Attendance Manager</title>
 
 <link rel="stylesheet" href="style.css">
 <link rel="manifest" href="manifest.json">
 
 </head>
 
-<body>
+<body class="login-page">
 
-<header>
-📋 Smart Attendance Manager
-</header>
+<div class="login-wrapper">
 
-<div class="container">
+<div class="login-card">
 
-<button id="loginBtn" class="primary">
+<h1>📋 Smart Attendance</h1>
+
+<p>Simple & Smart Attendance System</p>
+
+<button id="loginBtn" class="btn-google">
 Login with Gmail
 </button>
+
+<button id="installBtn" class="btn-install">
+Add to Home Screen
+</button>
+
+</div>
 
 </div>
 
 <script type="module" src="login.js"></script>
 
+<script>
+
+let deferredPrompt
+
+window.addEventListener("beforeinstallprompt",(e)=>{
+
+e.preventDefault()
+
+deferredPrompt=e
+
+document.getElementById("installBtn").style.display="block"
+
+})
+
+document.getElementById("installBtn").onclick=async()=>{
+
+if(deferredPrompt){
+
+deferredPrompt.prompt()
+
+}
+
+}
+
+</script>
+<div id="loader" class="loader-wrapper">
+
+<div class="loader"></div>
+
+</div>
+
+<div id="toast" class="toast"></div>
 </body>
 </html>

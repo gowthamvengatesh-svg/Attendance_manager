@@ -19,13 +19,25 @@
 
 <body>
 
-<header>
+<header class="topbar">
 
-📋 Teacher Attendance
+<div class="logo">
+📋 Smart Attendance
+</div>
 
-<div class="header-right">
-<span id="userInfo"></span>
-<button id="logoutBtn">Logout</button>
+<div class="profile-area">
+
+<img id="profilePic" class="avatar">
+
+<div class="profile-text">
+
+<div id="teacherNameDisplay"></div>
+<div id="classDisplay"></div>
+
+</div>
+
+<button id="logoutBtn" class="logout-btn">Logout</button>
+
 </div>
 
 </header>
@@ -111,6 +123,12 @@
 </div>
 
 </div>
+<div id="loader" class="loader-wrapper">
 
+<div class="loader"></div>
+
+</div>
+
+<div id="toast" class="toast"></div>
 </body>
 </html>

@@ -58,7 +58,7 @@ count++
 
 await batch.commit()
 
-alert(count+" students imported successfully")
+showToast(count+" students imported successfully")
 
 window.loadStudents()
 

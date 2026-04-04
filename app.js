@@ -25,6 +25,49 @@ import { drawChart } from "./charts.js"
 let attendance={}
 let students=[]
 
+
+// ---------- GLOBAL LOADER + TOAST ----------
+
+window.showLoader=function(){
+const loader=document.getElementById("loader")
+if(loader) loader.style.display="flex"
+}
+
+window.hideLoader=function(){
+const loader=document.getElementById("loader")
+if(loader) loader.style.display="none"
+}
+
+window.showToast=function(msg){
+const toast=document.getElementById("toast")
+if(!toast) return
+toast.innerText=msg
+toast.classList.add("show")
+setTimeout(()=>toast.classList.remove("show"),3000)
+}
+
+
+// ---------- AUTH ----------
+
+onAuthStateChanged(auth,(user)=>{
+
+if(user){
+
+loadStudents()
+
+const pic=document.getElementById("profilePic")
+const name=document.getElementById("teacherNameDisplay")
+
+if(pic) pic.src=user.photoURL
+if(name) name.innerText=user.displayName
+
+}
+
+})
+
+
+// ---------- BUTTON EVENTS ----------
+
 document.getElementById("addStudent").onclick=addStudent
 document.getElementById("uploadExcel").onclick=uploadExcel
 document.getElementById("presentAll").onclick=presentAll
@@ -35,19 +78,13 @@ document.getElementById("saveProfile").onclick=saveProfile
 document.getElementById("logoutBtn").onclick=logout
 document.getElementById("viewHistory").onclick=viewHistory
 
-onAuthStateChanged(auth,(user)=>{
-if(user){
-loadStudents()
-}
-})
+
+// ---------- PROFILE ----------
 
 async function saveProfile(){
 
 const teacher=document.getElementById("teacherName").value
 const cls=document.getElementById("className").value
-
-document.getElementById("userInfo").innerText=
-teacher+" | "+cls
 
 await setDoc(
 doc(db,"users",auth.currentUser.uid),
@@ -58,14 +95,27 @@ className:cls
 {merge:true}
 )
 
+document.getElementById("teacherNameDisplay").innerText=teacher
+document.getElementById("classDisplay").innerText=cls
+
+showToast("Profile saved")
+
 }
+
+
+// ---------- ADD STUDENT ----------
 
 async function addStudent(){
 
-const roll=document.getElementById("roll").value
-const name=document.getElementById("name").value
+const roll=document.getElementById("roll").value.trim()
+const name=document.getElementById("name").value.trim()
 
-if(!roll||!name)return
+if(!roll||!name){
+showToast("Enter student details")
+return
+}
+
+showLoader()
 
 await addDoc(
 collection(db,"users",auth.currentUser.uid,"students"),
@@ -75,6 +125,10 @@ name,
 order:Date.now()
 })
 
+hideLoader()
+
+showToast("Student added")
+
 document.getElementById("roll").value=""
 document.getElementById("name").value=""
 
@@ -82,9 +136,12 @@ loadStudents()
 
 }
 
+
+// ---------- LOAD STUDENTS ----------
+
 window.loadStudents=async function(){
 
-const q = query(
+const q=query(
 collection(db,"users",auth.currentUser.uid,"students"),
 orderBy("order")
 )
@@ -92,7 +149,6 @@ orderBy("order")
 const snapshot=await getDocs(q)
 
 const container=document.getElementById("studentList")
-
 container.innerHTML=""
 
 students=[]
@@ -107,11 +163,9 @@ students.push({id:docSnap.id,...data})
 attendance[docSnap.id]="Present"
 
 let div=document.createElement("div")
-
 div.className="student"
-div.dataset.id=docSnap.id
 
-div.innerHTML = `
+div.innerHTML=`
 
 <div>
 
@@ -145,15 +199,16 @@ container.appendChild(div)
 
 updateSummary()
 
-
 }
+
+
+// ---------- MARK ATTENDANCE ----------
 
 window.mark=function(id,status,btn){
 
 attendance[id]=status
 
 const parent=btn.parentElement
-
 const buttons=parent.querySelectorAll("button")
 
 buttons[0].classList.remove("present-active")
@@ -169,29 +224,25 @@ buttons[1].classList.add("absent-active")
 
 updateSummary()
 
-saveAttendance()
-
 }
 
-window.removeStudent = async function(id){
 
-try{
+// ---------- REMOVE STUDENT ----------
+
+window.removeStudent=async function(id){
 
 await deleteDoc(
 doc(db,"users",auth.currentUser.uid,"students",id)
 )
 
+showToast("Student removed")
+
 loadStudents()
 
-}catch(err){
-
-console.error(err)
-
-alert("Failed to remove student")
-
 }
 
-}
+
+// ---------- PRESENT ALL ----------
 
 function presentAll(){
 
@@ -203,7 +254,12 @@ updateSummary()
 
 }
 
+
+// ---------- REMOVE ALL ----------
+
 async function removeAllStudents(){
+
+if(!confirm("Remove all students?")) return
 
 const snapshot=await getDocs(
 collection(db,"users",auth.currentUser.uid,"students")
@@ -213,9 +269,14 @@ for(const s of snapshot.docs){
 await deleteDoc(s.ref)
 }
 
+showToast("All students removed")
+
 loadStudents()
 
 }
+
+
+// ---------- SUMMARY ----------
 
 function updateSummary(){
 
@@ -224,17 +285,20 @@ let absent=0
 
 for(let s in attendance){
 
-if(attendance[s]=="Present")present++
+if(attendance[s]=="Present") present++
 else absent++
 
 }
 
 document.getElementById("summary").innerText=
-"Present: "+present+" | Absent: "+absent
+`Present: ${present} | Absent: ${absent}`
 
 drawChart(present,absent)
 
 }
+
+
+// ---------- WHATSAPP ----------
 
 function sendWhatsApp(){
 
@@ -246,7 +310,7 @@ students.forEach(s=>{
 
 if(attendance[s.id]=="Absent"){
 
-msg+=s.roll+" - "+s.name+"%0A"
+msg+=`${s.roll} - ${s.name}%0A`
 
 }
 
@@ -256,18 +320,15 @@ window.open(`https://wa.me/${number}?text=${msg}`)
 
 }
 
+
+// ---------- EXPORT EXCEL ----------
+
 function exportExcel(){
 
 let rows=[["Roll","Name","Status"]]
 
 students.forEach(s=>{
-
-rows.push([
-s.roll,
-s.name,
-attendance[s.id]
-])
-
+rows.push([s.roll,s.name,attendance[s.id]])
 })
 
 let sheet=XLSX.utils.aoa_to_sheet(rows)
@@ -280,6 +341,9 @@ XLSX.writeFile(wb,"attendance.xlsx")
 
 }
 
+
+// ---------- LOGOUT ----------
+
 function logout(){
 
 signOut(auth)
@@ -288,18 +352,21 @@ window.location="index.html"
 
 }
 
+
+// ---------- SAVE ATTENDANCE ----------
+
 async function saveAttendance(){
 
 const date=document.getElementById("attendanceDate").value
 
-if(!date)return
+if(!date) return
 
 let present=0
 let absent=0
 
 for(let s in attendance){
 
-if(attendance[s]=="Present")present++
+if(attendance[s]=="Present") present++
 else absent++
 
 }
@@ -309,20 +376,23 @@ collection(db,"users",auth.currentUser.uid,"attendanceHistory"),
 {
 date,
 present,
-absent,
-attendanceData:attendance
+absent
 })
 
 }
 
+
+// ---------- VIEW HISTORY ----------
+
 async function viewHistory(){
+
+await saveAttendance()
 
 const snapshot=await getDocs(
 collection(db,"users",auth.currentUser.uid,"attendanceHistory")
 )
 
 const container=document.getElementById("historyList")
-
 container.innerHTML=""
 
 snapshot.forEach(docSnap=>{
@@ -350,35 +420,39 @@ Absent: ${data.absent}
 })
 
 }
-window.moveUp = async function(id){
 
-const index = students.findIndex(s => s.id === id)
 
-if(index <= 0) return
+// ---------- MOVE ORDER ----------
 
-const temp = students[index]
-students[index] = students[index-1]
-students[index-1] = temp
+window.moveUp=async function(id){
 
-await updateStudentOrder()
+const index=students.findIndex(s=>s.id===id)
 
-}
+if(index<=0) return
 
-window.moveDown = async function(id){
+const temp=students[index]
+students[index]=students[index-1]
+students[index-1]=temp
 
-const index = students.findIndex(s => s.id === id)
-
-if(index === students.length-1) return
-
-const temp = students[index]
-students[index] = students[index+1]
-students[index+1] = temp
-
-await updateStudentOrder()
+await updateOrder()
 
 }
 
-async function updateStudentOrder(){
+window.moveDown=async function(id){
+
+const index=students.findIndex(s=>s.id===id)
+
+if(index===students.length-1) return
+
+const temp=students[index]
+students[index]=students[index+1]
+students[index+1]=temp
+
+await updateOrder()
+
+}
+
+async function updateOrder(){
 
 for(let i=0;i<students.length;i++){
 
